@@ -37,8 +37,8 @@ async def upload_form(
             shutil.copyfileobj(file.file, file_object)
         print(f'file {new_name} saved at {file_path}')
 
-        # await send_file_to_llm(file_path)
-        background_tasks.add_task(send_file_to_llm, file_path)
+        await send_file_to_llm(file_path)
+        # background_tasks.add_task(send_file_to_llm, file_path)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
