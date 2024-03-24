@@ -2,7 +2,7 @@ import asyncio
 import os
 import shutil
 
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy import insert, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -23,6 +23,7 @@ router = APIRouter()
 async def upload_form(
         dock_name: str,
         dock_description: str,
+        background_tasks: BackgroundTasks,
         file: UploadFile = File(...),
         user: AuthUser = Depends(current_verified_user),
         session: AsyncSession = Depends(get_async_session)):
@@ -36,12 +37,14 @@ async def upload_form(
             shutil.copyfileobj(file.file, file_object)
         print(f'file {new_name} saved at {file_path}')
 
-        await send_file_to_llm(file_path)
+        # await send_file_to_llm(file_path)
+        background_tasks.add_task(send_file_to_llm, file_path)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         await asyncio.to_thread(os.remove, file_path)
+        print(f'file {new_name} has been deleted from {file_path}')
 
     try:
         stmt = insert(doc).values(name=dock_name, description=dock_description, path='/test', user_id=user.id)
