@@ -69,6 +69,17 @@ async def get_my_docs(user: AuthUser = Depends(current_verified_user), session: 
     return result.mappings().all()
 
 
+@router.get(
+    '/all',
+    status_code=status.HTTP_200_OK,
+)
+async def get_my_docs(session: AsyncSession = Depends(get_async_session)):
+    query = select(doc.c.name)
+    result = await session.execute(query)
+
+    return result.mappings().all()
+
+
 @router.delete(
     '/delete-my/{doc_id}',
     name="docs:delete_doc",
