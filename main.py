@@ -19,8 +19,7 @@ origins = [
     "http://localhost:3000/signUp",
     "http://localhost:8001",
     "http://localhost:3000/logIn",
-    "http://localhost:3000/request",
-
+    "http://localhost:3000/request"
 ]
 
 # headers = ["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
@@ -29,7 +28,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
