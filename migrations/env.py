@@ -11,6 +11,7 @@ from config.config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
 # access to the values within the .ini file in use.
 from src.auth.models import metadata as auth_metadata
 from src.docs.models import metadata as docs_metadata
+from src.llm_service.models import metadata as llm_service_metadata
 config = context.config
 
 section = config.config_ini_section
@@ -28,7 +29,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
-target_metadata = [auth_metadata, docs_metadata]
+target_metadata = [auth_metadata, docs_metadata, llm_service_metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

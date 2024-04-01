@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from database.database import get_async_session
 from src.auth.models import AuthUser
+from src.llm_service.schemas import Feedback
 from src.llm_service.utils import send_data_to_llm
+from src.llm_service.statistics import add_statistic_row, add_feedback_row
 from src.auth.auth_config import current_verified_user
 
 router = APIRouter()
@@ -11,20 +15,56 @@ router = APIRouter()
 async def send_data(
         filename: str,
         question: str,
+        session: AsyncSession = Depends(get_async_session)
 ):
     data = {'filename': filename,
             'question': question}
-    result = await send_data_to_llm('process_questions', data)
-    return {"result_from_gigachatAPI": result}
+    response = await send_data_to_llm('process_questions', data)
+    request_id = await add_statistic_row(
+        operation='get_answer',
+        prompt_path=response['prompt_path'],
+        tokens=response['tokens'],
+        lead_time=response['lead_time'],
+        metrics=response['metrics'],
+        session=session
+    )
+    result = response['result']
+    result['request_id'] = request_id
+    return result
 
 
 @router.post("/get_test")
 async def send_data(
         filename: str,
-        que_num: int,
-        #user: AuthUser = Depends(current_verified_user),
+        # user: AuthUser = Depends(current_verified_user),
+        session: AsyncSession = Depends(get_async_session)
 ):
-    data = {'filename': filename,
-            'que_num': que_num}
-    result = await send_data_to_llm('process_data', data)
-    return {"result_from_gigachatAPI": result}
+    data = {'filename': filename}
+    response = await send_data_to_llm('process_data', data)
+    request_id = await add_statistic_row(
+        operation='get_test',
+        prompt_path=response['prompt_path'],
+        tokens=response['tokens'],
+        lead_time=response['lead_time'],
+        metrics=None,
+        session=session
+    )
+    result = response['result']
+    result['request_id'] = request_id
+    return result
+
+
+@router.post("/send_feedback")
+async def send_feedback(
+        feedback: Feedback,
+        session: AsyncSession = Depends(get_async_session)
+):
+    await add_feedback_row(
+        value=feedback.value,
+        llm_response=feedback.llm_response,
+        user_comment=feedback.user_comment,
+        request_id=feedback.request_id,
+        session=session
+    )
+    return {"result": "feedback added successfully"}
+
