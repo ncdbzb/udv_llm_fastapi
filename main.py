@@ -9,6 +9,7 @@ from src.auth.routers.verify_router import router as verify_router
 from src.auth.routers.forgot_pass_router import router as forgot_pass_router
 from src.docs.router import router as upload_docs_router
 from src.llm_service.router import router as llm_service_router
+from src.admin_panel.router import router as admin_panel_router
 
 app = FastAPI(
     title="UDV LLM",
@@ -65,7 +66,12 @@ app.include_router(
     tags=["Docs"],
 )
 app.include_router(
-    llm_service_router,
+    llm_service_router
+)
+app.include_router(
+    admin_panel_router,
+    prefix="/admin",
+    tags=["Admin"]
 )
 
 if __name__ == "__main__":

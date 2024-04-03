@@ -17,17 +17,8 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
 
     async def on_after_register(self, user: AuthUser, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
-        token_data = {
-            "sub": str(user.id),
-            "email": user.email,
-            "aud": self.verification_token_audience,
-        }
-        token = generate_jwt(
-            token_data,
-            self.verification_token_secret,
-            self.verification_token_lifetime_seconds,
-        )
-        send_email(user.name, user.email, token, 'verify')
+
+        await send_email(name=user.name, user_email=user.email, token='', destiny='approval')
 
     async def on_after_forgot_password(
         self, user: AuthUser, token: str, request: Optional[Request] = None
@@ -43,7 +34,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
             self.reset_password_token_secret,
             self.reset_password_token_lifetime_seconds,
         )
-        send_email(user.name, user.email, token, 'forgot')
+        await send_email(user.name, user.email, token, 'forgot')
 
     async def validate_password(
         self, password: str, user: AuthUser

@@ -8,16 +8,32 @@ SMTP_HOST = 'smtp.gmail.com'
 SMTP_PORT = 465
 
 
-def get_verify_email_template(name: str, user_email: str, token: str) -> EmailMessage:
+async def get_approval_email_template(name: str, user_email: str) -> EmailMessage:
     email = EmailMessage()
-    email['Subject'] = 'Подтвердите свой аккаунт'
+    email['Subject'] = 'Заявка'
     email['From'] = SMTP_USER
     email['To'] = user_email
 
     email.set_content(
         '<div>'
         f'<h1>Здравствуйте, {name}</h1>'
-        '<p>Чтобы пройти верификацию, перейдите по <b>ссылке</b></p>'
+        '<p>Мы получили Вашу заявку! В ближайшее время администратор её проверит, и Вы получите ответ.</p>'
+        '</div>',
+        subtype='html'
+    )
+    return email
+
+
+async def get_accepted_request_email_template(name: str, user_email: str, token: str) -> EmailMessage:
+    email = EmailMessage()
+    email['Subject'] = 'Заявка'
+    email['From'] = SMTP_USER
+    email['To'] = user_email
+
+    email.set_content(
+        '<div>'
+        f'<h1>Здравствуйте, {name}</h1>'
+        '<p>Ваша заявка одобрена! Чтобы верифицировать аккаунт, перейдите по <b>ссылке</b></p>'
         f'<p>http://localhost:8000/auth/verify/{token}</p>'
         '</div>',
         subtype='html'
@@ -25,7 +41,23 @@ def get_verify_email_template(name: str, user_email: str, token: str) -> EmailMe
     return email
 
 
-def get_forgot_email_template(name: str, user_email: str, token: str) -> EmailMessage:
+async def get_rejected_request_email_template(name: str, user_email: str,) -> EmailMessage:
+    email = EmailMessage()
+    email['Subject'] = 'Заявка'
+    email['From'] = SMTP_USER
+    email['To'] = user_email
+
+    email.set_content(
+        '<div>'
+        f'<h1>Здравствуйте, {name}</h1>'
+        '<p>Ваша заявка отклонена.</p>'
+        '</div>',
+        subtype='html'
+    )
+    return email
+
+
+async def get_forgot_email_template(name: str, user_email: str, token: str) -> EmailMessage:
     email = EmailMessage()
     email['Subject'] = 'Сброс пароля'
     email['From'] = SMTP_USER
@@ -42,11 +74,15 @@ def get_forgot_email_template(name: str, user_email: str, token: str) -> EmailMe
     return email
 
 
-def send_email(name: str, user_email: str,  token: str, destiny: str):
-    if destiny == 'verify':
-        email = get_verify_email_template(name, user_email, token)
+async def send_email(name: str, user_email: str,  token: str | None, destiny: str):
+    if destiny == 'approval':
+        email = await get_approval_email_template(name, user_email)
+    elif destiny == 'accept':
+        email = await get_accepted_request_email_template(name, user_email, token)
     elif destiny == 'forgot':
-        email = get_forgot_email_template(name, user_email, token)
+        email = await get_forgot_email_template(name, user_email, token)
+    elif destiny == 'reject':
+        email = await get_rejected_request_email_template(name, user_email)
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(SMTP_USER, SMTP_PASSWORD)
         server.send_message(email)
