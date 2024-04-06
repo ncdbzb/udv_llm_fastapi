@@ -13,7 +13,6 @@ user = Table(
     Column("name", String, nullable=False),
     Column("surname", String, nullable=False),
     Column("email", String, nullable=False),
-    Column("company_representative", Boolean, nullable=False),
     Column("hashed_password", String, nullable=False),
     Column("is_active", Boolean, default=True, nullable=False),
     Column("is_superuser", Boolean, default=False, nullable=False),
@@ -26,7 +25,6 @@ class AuthUser(SQLAlchemyBaseUserTable[int], Base):
     name = Column(String, nullable=False)
     surname = Column(String, nullable=False)
     email = Column(String, nullable=False)
-    company_representative = Column(Boolean, nullable=False)
     hashed_password: str = Column(String(length=1024), nullable=False)
     is_active: bool = Column(Boolean, default=True, nullable=False)
     is_superuser: bool = Column(Boolean, default=False, nullable=False)

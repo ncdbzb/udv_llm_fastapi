@@ -95,8 +95,6 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
         user_dict["is_active"] = True
         user_dict["is_superuser"] = False
         user_dict["is_verified"] = False
-        if 'company_representative' not in user_dict:
-            user_dict["company_representative"] = False
 
         created_user = await self.user_db.create(user_dict)
 

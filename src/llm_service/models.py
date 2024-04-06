@@ -10,8 +10,9 @@ request_statistic = Table(
     Column("operation", String, nullable=False),
     Column("prompt_path", String, nullable=False),
     Column("tokens", Integer, nullable=False),
-    Column("lead_time", Numeric(precision=10, scale=3), nullable=False),
-    Column("metrics", JSON, nullable=True)
+    Column("total_time", Numeric(precision=10, scale=3), nullable=False),
+    Column("metrics", JSON, nullable=True),
+    Column("gigachat_time", Numeric(precision=10, scale=3)),
 )
 
 feedback = Table(

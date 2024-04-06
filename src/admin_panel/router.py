@@ -21,7 +21,7 @@ async def get_admin_panel(
         user: AuthUser = Depends(current_superuser),
         session: AsyncSession = Depends(get_async_session)
 ):
-    query = select(admin_requests)
+    query = select(admin_requests).where(admin_requests.c.status == 'approval')
     result = await session.execute(query)
 
     return result.mappings().all()
@@ -33,13 +33,13 @@ async def reject_request(
         user: AuthUser = Depends(current_superuser),
         session: AsyncSession = Depends(get_async_session)
 ):
-    query = select(admin_requests).where(admin_requests.c.request_id == int(request_id))
+    query = select(admin_requests).where(admin_requests.c.id == int(request_id))
     result = await session.execute(query)
     info = result.fetchone().info
 
     await send_email(name=info.get('name'), user_email=info.get('email'), token='', destiny='reject')
 
-    stmt = update(admin_requests).where(admin_requests.c.request_id == int(request_id)).values(status='rejected')
+    stmt = update(admin_requests).where(admin_requests.c.id == int(request_id)).values(status='rejected')
     await session.execute(stmt)
     await session.commit()
 

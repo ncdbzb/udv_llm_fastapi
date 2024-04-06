@@ -24,8 +24,9 @@ async def send_data(
         operation='get_answer',
         prompt_path=response['prompt_path'],
         tokens=response['tokens'],
-        lead_time=response['lead_time'],
+        total_time=response['total_time'],
         metrics=response['metrics'],
+        gigachat_time=response['gigachat_time'],
         session=session
     )
     result = response['result']
@@ -45,8 +46,9 @@ async def send_data(
         operation='get_test',
         prompt_path=response['prompt_path'],
         tokens=response['tokens'],
-        lead_time=response['lead_time'],
+        total_time=response['total_time'],
         metrics=None,
+        gigachat_time=response['gigachat_time'],
         session=session
     )
     result = response['result']

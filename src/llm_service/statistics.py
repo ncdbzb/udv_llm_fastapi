@@ -11,8 +11,9 @@ async def add_statistic_row(
         operation: str,
         prompt_path: str,
         tokens: int,
-        lead_time: float,
+        total_time: float,
         metrics: list[int] | None,
+        gigachat_time: float,
         session: AsyncSession
 ):
     try:
@@ -21,8 +22,9 @@ async def add_statistic_row(
             operation=operation,
             prompt_path=prompt_path,
             tokens=tokens,
-            lead_time=lead_time,
+            total_time=total_time,
             metrics=metrics,
+            gigachat_time=gigachat_time
         )
         await session.execute(stmt)
         await session.commit()
