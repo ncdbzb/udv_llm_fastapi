@@ -48,7 +48,7 @@ async def upload_form(
         print(f'file {new_name} has been deleted from {file_path}')
 
     try:
-        stmt = insert(doc).values(name=dock_name, description=dock_description, path='/test', user_id=user.id)
+        stmt = insert(doc).values(name=dock_name, description=dock_description, user_id=user.id)
         await session.execute(stmt)
         await session.commit()
         return {'status': 'added new doc'}

@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, DateTime, JSON, Numeric
+from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, DateTime, JSON, Numeric, Boolean
 
 metadata = MetaData()
 
@@ -23,4 +23,5 @@ feedback = Table(
     Column("llm_response", String, nullable=False),
     Column("user_comment", String, nullable=True),
     Column("request_id", Integer, ForeignKey(request_statistic.c.id)),
+    Column("viewed", Boolean, nullable=True, default=False)
 )

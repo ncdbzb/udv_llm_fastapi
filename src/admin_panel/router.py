@@ -6,10 +6,10 @@ from database.database import get_async_session
 from src.auth.models import AuthUser
 from src.admin_panel.models import admin_requests
 from src.auth.send_email import send_email
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 from src.auth.auth_config import current_superuser
+from src.llm_service.models import request_statistic, feedback
 from config.config import SECRET_MANAGER as verification_token_secret
-from database.database import async_session_maker
 
 
 router = APIRouter()
@@ -20,7 +20,7 @@ async def get_admin_panel(
         user: AuthUser = Depends(current_superuser),
         session: AsyncSession = Depends(get_async_session)
 ):
-    query = select(admin_requests).where(admin_requests.c.status == 'approval')
+    query = select(admin_requests.c.info).where(admin_requests.c.status == 'approval')
     result = await session.execute(query)
 
     return result.mappings().all()
@@ -78,11 +78,47 @@ async def accept_request(
     return {'status': f'request #{request_id} has been accepted successfully'}
 
 
-# @router.post('/send-request')
-# async def send_request(
-#         auth_user: admin_request_schema,
-#         # session: AsyncSession = Depends(get_async_session)
-# ):
-#     async with async_session_maker() as session:
-#         await add_admin_request(auth_user, session=session)
-#     return {'status': 'add new request to table'}
+@router.post('/get_feedback')
+async def get_feedback(
+        all: bool,
+        user: AuthUser = Depends(current_superuser),
+        session: AsyncSession = Depends(get_async_session)
+):
+    if all:
+        query = select(feedback)
+        result = await session.execute(query)
+    else:
+        query = select(feedback).where(feedback.c.viewed == False)
+        result = await session.execute(query)
+
+    return result.mappings().all()
+
+
+@router.post('/set_viewed')
+async def set_viewed(
+        feedback_id: int,
+        user: AuthUser = Depends(current_superuser),
+        session: AsyncSession = Depends(get_async_session)
+):
+    stmt = update(feedback).where(feedback.c.id == int(feedback_id)).values(viewed=True)
+    await session.execute(stmt)
+    await session.commit()
+
+    return {'status': f'feedback #{feedback_id} was viewed'}
+
+@router.post('/get_tokens')
+async def get_tokens(
+        operation: str,
+        user: AuthUser = Depends(current_superuser),
+        session: AsyncSession = Depends(get_async_session)
+):
+    if operation in ('get_test', 'get_answer'):
+        query = select(func.sum(request_statistic.c.tokens)).where(request_statistic.c.operation == operation)
+        result = await session.execute(query)
+    elif operation == 'both':
+        query = select(func.sum(request_statistic.c.tokens))
+        result = await session.execute(query)
+    else:
+        raise ValueError("Unexpected operation")
+    
+    return result.scalar()
