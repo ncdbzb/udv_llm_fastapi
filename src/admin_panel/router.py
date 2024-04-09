@@ -6,11 +6,10 @@ from database.database import get_async_session
 from src.auth.models import AuthUser
 from src.admin_panel.models import admin_requests
 from src.auth.send_email import send_email
-from src.admin_panel.utils import add_admin_request
-from src.admin_panel.schemas import admin_request_schema
 from sqlalchemy import select, update
 from src.auth.auth_config import current_superuser
 from config.config import SECRET_MANAGER as verification_token_secret
+from database.database import async_session_maker
 
 
 router = APIRouter()
@@ -45,6 +44,7 @@ async def reject_request(
 
     return {'status': f'request #{request_id} has been rejected successfully'}
 
+
 @router.post('/accept')
 async def accept_request(
         request_id: int,
@@ -78,10 +78,11 @@ async def accept_request(
     return {'status': f'request #{request_id} has been accepted successfully'}
 
 
-@router.post('/send-request')
-async def send_request(
-        auth_user: admin_request_schema,
-        session: AsyncSession = Depends(get_async_session)
-):
-    await add_admin_request(auth_user, session=session)
-    return {'status': 'add new request to table'}
+# @router.post('/send-request')
+# async def send_request(
+#         auth_user: admin_request_schema,
+#         # session: AsyncSession = Depends(get_async_session)
+# ):
+#     async with async_session_maker() as session:
+#         await add_admin_request(auth_user, session=session)
+#     return {'status': 'add new request to table'}

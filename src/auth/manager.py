@@ -8,6 +8,8 @@ from fastapi_users.jwt import generate_jwt, decode_jwt
 from src.auth.models import AuthUser
 from src.auth.utils import get_user_db
 from src.auth.send_email import send_email
+from database.database import async_session_maker
+from src.admin_panel.utils import add_admin_request
 from config.config import SECRET_MANAGER
 
 
@@ -17,6 +19,9 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
 
     async def on_after_register(self, user: AuthUser, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
+
+        async with async_session_maker() as session:
+            await add_admin_request(user.email, session=session)
 
         await send_email(name=user.name, user_email=user.email, token='', destiny='approval')
 

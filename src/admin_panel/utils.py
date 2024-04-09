@@ -5,16 +5,16 @@ from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
-
-from src.admin_panel.schemas import admin_request_schema
+from pydantic import EmailStr
 from src.admin_panel.models import admin_requests
 from src.auth.models import user
 
+
 async def add_admin_request(
-        auth_user: admin_request_schema,
+        email: EmailStr,
         session: AsyncSession
 ):
-    query = select(user).where(user.c.email == auth_user.email)
+    query = select(user).where(user.c.email == email)
     result = await session.execute(query)
     user_row = result.fetchone()
 
@@ -22,7 +22,7 @@ async def add_admin_request(
         info = {
             'name': user_row.name,
             'surname': user_row.surname,
-            'email': auth_user.email,
+            'email': email,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
