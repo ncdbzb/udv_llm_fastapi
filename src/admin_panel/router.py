@@ -20,7 +20,7 @@ async def get_admin_panel(
         user: AuthUser = Depends(current_superuser),
         session: AsyncSession = Depends(get_async_session)
 ):
-    query = select(admin_requests.c.info).where(admin_requests.c.status == 'approval')
+    query = select(admin_requests).where(admin_requests.c.status == 'approval')
     result = await session.execute(query)
 
     return result.mappings().all()
@@ -80,11 +80,11 @@ async def accept_request(
 
 @router.post('/get_feedback')
 async def get_feedback(
-        all: bool,
+        all_feedbacks: bool,
         user: AuthUser = Depends(current_superuser),
         session: AsyncSession = Depends(get_async_session)
 ):
-    if all:
+    if all_feedbacks:
         query = select(feedback)
         result = await session.execute(query)
     else:
