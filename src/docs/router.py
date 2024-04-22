@@ -5,9 +5,8 @@ import shutil
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy import insert, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
 
-from src.auth.auth_config import current_verified_user
+from src.auth.auth_config import current_verified_user, current_superuser
 from src.auth.models import AuthUser
 from database.database import get_async_session
 from src.docs.models import doc
@@ -23,10 +22,12 @@ router = APIRouter()
 async def upload_form(
         dock_name: str,
         dock_description: str,
-        background_tasks: BackgroundTasks,
+        # background_tasks: BackgroundTasks,
         file: UploadFile = File(...),
         user: AuthUser = Depends(current_verified_user),
         session: AsyncSession = Depends(get_async_session)):
+    if file.filename.split('.')[-1] not in ('zip', 'txt'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File has an unsupported extension")
     query = select(doc).where(doc.c.name == dock_name)
     result = await session.execute(query)
     if result.fetchone():
@@ -67,19 +68,21 @@ async def get_my_docs(user: AuthUser = Depends(current_verified_user), session: 
     return result.mappings().all()
 
 
-# @router.get(
-#     '/all',
-#     status_code=status.HTTP_200_OK,
-# )
-# async def get_my_docs(session: AsyncSession = Depends(get_async_session)):
-#     query = select(doc.c.name)
-#     result = await session.execute(query)
+@router.get(
+    '/all',
+    status_code=status.HTTP_200_OK,
+)
+async def get_my_docs(
+    session: AsyncSession = Depends(get_async_session),
+    user: AuthUser = Depends(current_superuser)):
+    query = select(doc.c.name)
+    result = await session.execute(query)
 
-#     return result.mappings().all()
+    return result.mappings().all()
 
 
 @router.delete(
-    '/delete-my/{doc_id}',
+    '/delete-my',
     name="docs:delete_doc",
     responses={
         status.HTTP_401_UNAUTHORIZED: {
@@ -93,7 +96,10 @@ async def get_my_docs(user: AuthUser = Depends(current_verified_user), session: 
         },
     },
 )
-async def del_my_docs(doc_name: str, user: AuthUser = Depends(current_verified_user), session: AsyncSession = Depends(get_async_session)):
+async def del_my_docs(
+    doc_name: str,
+    user: AuthUser = Depends(current_verified_user),
+    session: AsyncSession = Depends(get_async_session)):
     query = select(doc).where(doc.c.name == doc_name)
     result = await session.execute(query)
 
@@ -106,7 +112,7 @@ async def del_my_docs(doc_name: str, user: AuthUser = Depends(current_verified_u
     result = await (session.execute(query))
     check_owner = result.mappings().one()['user_id']
     if check_owner != user.id:
-        raise HTTPException(status_code=403, detail=f"You are not the owner of this document {check_owner, user.id}")
+        raise HTTPException(status_code=403, detail=f"You are not the owner of this document")
 
     try:
         stmt = delete(doc).where(doc.c.name == doc_name)

@@ -1,7 +1,7 @@
 import jwt
 from typing import Optional
 
-from fastapi import Depends, Request, Response
+from fastapi import Depends, Request, Response, HTTPException, status
 from fastapi_users import BaseUserManager, exceptions, IntegerIDMixin, models, schemas, InvalidPasswordException
 from fastapi_users.jwt import generate_jwt, decode_jwt
 
@@ -10,7 +10,7 @@ from src.auth.utils import get_user_db
 from src.auth.send_email import send_email
 from database.database import async_session_maker
 from src.admin_panel.utils import add_admin_request
-from config.config import SECRET_MANAGER
+from config.config import SECRET_MANAGER, admin_dict
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
@@ -93,13 +93,22 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
             if safe
             else user_create.create_update_dict_superuser()
         )
-        password = user_dict.pop("password")
-        user_dict["hashed_password"] = self.password_helper.hash(password)
+        
+        if user_dict["email"] == admin_dict["email"]:
+            if user_dict["password"] == admin_dict["password"]:
+                user_dict = admin_dict.copy()
+                password = user_dict.pop("password")
+                user_dict["hashed_password"] = self.password_helper.hash(password)
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+        else:
+            password = user_dict.pop("password")
+            user_dict["hashed_password"] = self.password_helper.hash(password)
 
-        user_dict.pop("confirmation_password")
-        user_dict["is_active"] = True
-        user_dict["is_superuser"] = False
-        user_dict["is_verified"] = False
+            user_dict.pop("confirmation_password")
+            user_dict["is_active"] = True
+            user_dict["is_superuser"] = False
+            user_dict["is_verified"] = False
 
         created_user = await self.user_db.create(user_dict)
 

@@ -1,3 +1,5 @@
+from typing import Any
+
 from dotenv import load_dotenv
 import os
 
@@ -14,3 +16,13 @@ SECRET_JWT = os.environ.get("SECRET_JWT")
 
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 SMTP_USER = os.environ.get("SMTP_USER")
+
+admin_dict: dict[str: Any] = {
+    'name': 'admin',
+    'surname': 'admin',
+    'email': os.environ.get("ADMIN_EMAIL"),
+    'password': os.environ.get("ADMIN_PASSWORD"),
+    'is_active': True,
+    'is_superuser': True,
+    'is_verified': True
+}

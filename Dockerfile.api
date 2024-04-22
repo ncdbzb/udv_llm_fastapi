@@ -10,4 +10,7 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python3", "main.py"]
+# CMD ["python3", "database/check_doc_table.py"]
+# CMD ["python3", "main.py"]
+
+CMD ["sh", "-c", "python3 script.py && python3 main.py"]
