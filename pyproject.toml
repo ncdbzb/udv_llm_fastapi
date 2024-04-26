@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "udv-llm-fastapi"
+name = "fast-api"
 version = "0.1.0"
 description = ""
 authors = ["Kostya Pershin <kostya.pershin.18@mail.ru>"]
