@@ -11,4 +11,4 @@ RUN poetry install --no-root
 
 COPY . .
 
-CMD ["sh", "-c", "poetry run python3 script.py && poetry run python3 main.py"]
+CMD ["sh", "-c", "poetry run python3 main.py"]

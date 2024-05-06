@@ -6,7 +6,7 @@ from src.auth.manager import get_user_manager
 from src.auth.models import AuthUser
 from config.config import SECRET_JWT
 
-cookie_transport = CookieTransport(cookie_name="bonds", cookie_max_age=3600, cookie_samesite="none", cookie_secure=False)
+cookie_transport = CookieTransport(cookie_name="bonds", cookie_max_age=3600, cookie_samesite="none", cookie_secure=True)
 
 
 def get_jwt_strategy() -> JWTStrategy:

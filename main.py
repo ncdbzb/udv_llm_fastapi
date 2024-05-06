@@ -10,18 +10,11 @@ from src.auth.routers.forgot_pass_router import router as forgot_pass_router
 from src.docs.router import router as upload_docs_router
 from src.llm_service.router import router as llm_service_router
 from src.admin_panel.router import router as admin_panel_router
+from config.config import CORS_ORIGINS
 
 app = FastAPI(
     title="UDV LLM",
 )
-
-origins = [
-    "http://localhost:3000",
-    "http://localhost:3000/signUp",
-    "http://localhost:8001",
-    "http://localhost:3000/logIn",
-    "http://localhost:3000/request"
-]
 
 # headers = ["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
 #            "Authorization", "Cookie", "Accept"]
@@ -29,7 +22,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

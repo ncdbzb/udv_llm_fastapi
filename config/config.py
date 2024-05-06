@@ -17,6 +17,13 @@ SECRET_JWT = os.environ.get("SECRET_JWT")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 SMTP_USER = os.environ.get("SMTP_USER")
 
+CORS_ORIGINS = os.environ.get("CORS_ORIGINS")
+
+if CORS_ORIGINS:
+    CORS_ORIGINS = eval(CORS_ORIGINS)
+else:
+    print('CORS_ORIGINS not set in environment')
+
 admin_dict: dict[str: Any] = {
     'name': 'admin',
     'surname': 'admin',

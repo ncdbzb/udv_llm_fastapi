@@ -19,11 +19,11 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
 
     async def on_after_register(self, user: AuthUser, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
+        if user.email != 'admin@admin.com':
+            async with async_session_maker() as session:
+                await add_admin_request(user.email, session=session)
 
-        async with async_session_maker() as session:
-            await add_admin_request(user.email, session=session)
-
-        await send_email(name=user.name, user_email=user.email, token='', destiny='approval')
+            await send_email(name=user.name, user_email=user.email, token='', destiny='approval')
 
     async def on_after_forgot_password(
         self, user: AuthUser, token: str, request: Optional[Request] = None
