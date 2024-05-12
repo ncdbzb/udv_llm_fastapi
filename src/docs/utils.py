@@ -11,7 +11,7 @@ async def send_file_to_llm(file_path: str):
             return response.json()
 
 
-async def request_delete_doc(doc_name: int):
+async def request_delete_doc(doc_name: str):
     async with httpx.AsyncClient() as client:
         url = "http://gigachat_api:8080/process_delete_doc"
         response = await client.post(url, json={'doc_name': doc_name}, timeout=10)

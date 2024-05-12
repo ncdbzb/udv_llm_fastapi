@@ -1,9 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
-from src.auth.auth_config import auth_backend, fastapi_users, current_user
-from src.auth.models import AuthUser
+from src.auth.auth_config import auth_backend, fastapi_users
 from src.auth.schemas import UserRead, UserCreate, UserUpdate
 from src.auth.routers.verify_router import router as verify_router
 from src.auth.routers.forgot_pass_router import router as forgot_pass_router
@@ -15,6 +15,8 @@ from config.config import CORS_ORIGINS
 app = FastAPI(
     title="UDV LLM",
 )
+
+app.add_middleware(HTTPSRedirectMiddleware)
 
 # headers = ["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
 #            "Authorization", "Cookie", "Accept"]
@@ -68,4 +70,10 @@ app.include_router(
 )
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        ssl_keyfile='/chatops_udv/fast_api/certs/key.pem',
+        ssl_certfile='/chatops_udv/fast_api/certs/cert.pem'
+    )
