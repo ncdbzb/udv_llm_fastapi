@@ -12,11 +12,13 @@ from src.llm_service.router import router as llm_service_router
 from src.admin_panel.router import router as admin_panel_router
 from config.config import CORS_ORIGINS
 
+
 app = FastAPI(
     title="UDV LLM",
+    root_path="/api"
 )
 
-app.add_middleware(HTTPSRedirectMiddleware)
+# app.add_middleware(HTTPSRedirectMiddleware)
 
 # headers = ["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
 #            "Authorization", "Cookie", "Accept"]
@@ -74,6 +76,6 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=8000,
-        ssl_keyfile='/chatops_udv/fast_api/certs/key.pem',
-        ssl_certfile='/chatops_udv/fast_api/certs/cert.pem'
+        # ssl_keyfile='/chatops_udv/fast_api/certs/key.pem',
+        # ssl_certfile='/chatops_udv/fast_api/certs/cert.pem'
     )
