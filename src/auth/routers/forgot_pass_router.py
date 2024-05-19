@@ -49,7 +49,7 @@ async def forgot_password(
     try:
         user = await user_manager.get_by_email(email)
     except exceptions.UserNotExists:
-        return None
+        raise HTTPException(status_code=404, detail="User with this email does not exists")
 
     try:
         await user_manager.forgot_password(user, request)
@@ -90,5 +90,4 @@ async def reset_password(
             },
         )
     return {'status_code': 200,
-            'detail': 'password has been changed',
-            'password': password}
+            'detail': 'password has been changed'}

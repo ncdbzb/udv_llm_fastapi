@@ -1,7 +1,7 @@
 import smtplib
 from email.message import EmailMessage
 
-from config.config import SMTP_PASSWORD, SMTP_USER
+from config.config import SMTP_PASSWORD, SMTP_USER, SERVER_DOMEN
 
 
 SMTP_HOST = 'smtp.gmail.com'
@@ -34,7 +34,7 @@ async def get_accepted_request_email_template(name: str, user_email: str, token:
         '<div>'
         f'<h1>Здравствуйте, {name}</h1>'
         '<p>Ваша заявка одобрена! Чтобы верифицировать аккаунт, перейдите по <b>ссылке</b></p>'
-        f'<p>http://localhost:8000/auth/verify/{token}</p>'
+        f'<p>https://{SERVER_DOMEN}/reset_password?token={token}</p>'
         '</div>',
         subtype='html'
     )
@@ -67,7 +67,7 @@ async def get_forgot_email_template(name: str, user_email: str, token: str) -> E
         '<div>'
         f'<h1>Здравствуйте, {name}</h1>'
         '<p>Чтобы сбросить пароль, перейдите по <b>ссылке</b></p>'
-        f'<p>http://localhost:8000/auth/reset-password/{token}</p>'
+        f'<p>https://{SERVER_DOMEN}/reset_password?token={token}</p>'
         '</div>',
         subtype='html'
     )

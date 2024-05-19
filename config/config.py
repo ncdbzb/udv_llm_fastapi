@@ -33,3 +33,5 @@ admin_dict: dict[str: Any] = {
     'is_superuser': True,
     'is_verified': True
 }
+
+SERVER_DOMEN = os.environ.get("SERVER_DOMEN")
