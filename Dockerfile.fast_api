@@ -11,9 +11,9 @@ RUN poetry install --no-root
 
 COPY . .
 
-RUN mkdir -p /chatops_udv/fast_api/certs
-RUN apt-get update && apt-get install -y openssl
-RUN openssl req -x509 -newkey rsa:4096 -nodes -out /chatops_udv/fast_api/certs/cert.pem -keyout /chatops_udv/fast_api/certs/key.pem -days 365 \
-    -subj "/C=RU/ST=Moscow/L=Moscow/O=Organization/OU=Org/CN=localhost"
+# RUN mkdir -p /chatops_udv/fast_api/certs
+# RUN apt-get update && apt-get install -y openssl
+# RUN openssl req -x509 -newkey rsa:4096 -nodes -out /chatops_udv/fast_api/certs/cert.pem -keyout /chatops_udv/fast_api/certs/key.pem -days 365 \
+#     -subj "/C=RU/ST=Moscow/L=Moscow/O=Organization/OU=Org/CN=localhost"
 
 CMD ["sh", "-c", "poetry run python3 main.py"]

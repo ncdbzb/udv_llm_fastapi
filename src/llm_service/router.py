@@ -37,10 +37,10 @@ async def send_data(
         gigachat_time=response['gigachat_time'],
         session=session
     )
-    # result = {'result': response['result'],
-    #           'request_id': request_id}
-    result = response['result']
-    result['request_id'] = request_id
+    result = {'result': response['result'],
+              'request_id': request_id}
+    # result = response['result']
+    # result['request_id'] = request_id
     return result
 
 

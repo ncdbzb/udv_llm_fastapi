@@ -75,7 +75,7 @@ async def get_my_docs(user: AuthUser = Depends(current_verified_user), session: 
 async def get_my_docs(
     session: AsyncSession = Depends(get_async_session),
     user: AuthUser = Depends(current_superuser)):
-    query = select(doc.c.name)
+    query = select(doc)
     result = await session.execute(query)
 
     return result.mappings().all()
@@ -108,11 +108,12 @@ async def del_my_docs(
         raise HTTPException(status_code=404, detail="The doc does not exist.")
 
     # Проверка, что текущий пользователь является владельцем документа
-    query = select(doc.c.user_id).where(doc.c.name == doc_name)
-    result = await (session.execute(query))
-    check_owner = result.mappings().one()['user_id']
-    if check_owner != user.id:
-        raise HTTPException(status_code=403, detail=f"You are not the owner of this document")
+    if not user.is_superuser:
+        query = select(doc.c.user_id).where(doc.c.name == doc_name)
+        result = await (session.execute(query))
+        check_owner = result.mappings().one()['user_id']
+        if check_owner != user.id:
+            raise HTTPException(status_code=403, detail=f"You are not the owner of this document")
 
     try:
         stmt = delete(doc).where(doc.c.name == doc_name)

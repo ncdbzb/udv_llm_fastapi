@@ -34,7 +34,7 @@ async def get_accepted_request_email_template(name: str, user_email: str, token:
         '<div>'
         f'<h1>Здравствуйте, {name}</h1>'
         '<p>Ваша заявка одобрена! Чтобы верифицировать аккаунт, перейдите по <b>ссылке</b></p>'
-        f'<p>https://{SERVER_DOMEN}/reset_password?token={token}</p>'
+        f'<p>https://{SERVER_DOMEN}/api/auth/verify/{token}</p>'
         '</div>',
         subtype='html'
     )
