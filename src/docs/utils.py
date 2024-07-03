@@ -1,4 +1,7 @@
 import httpx
+import ipaddress
+import re
+from fastapi import HTTPException, status
 
 
 async def send_file_to_llm(file_path: str):
@@ -23,3 +26,30 @@ async def request_get_actual_doc_list():
         url = "http://gigachat_api:8080/process_get_actual_doc_list"
         response = await client.post(url, timeout=10)
         return response.json()
+
+
+def is_valid_filename(filename: str) -> bool:
+    # 1. Contains 3-63 characters
+    if not (3 <= len(filename) <= 63):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename must contain between 3 and 63 characters.")
+    
+    # 2. Starts and ends with an alphanumeric character
+    if not (filename[0].isalnum() and filename[-1].isalnum()):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename must start and end with an alphanumeric character.")
+    
+    # 3. Contains only alphanumeric characters, underscores or hyphens (-)
+    if not re.match(r'^[a-zA-Z0-9_-]*$', filename):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename can only contain alphanumeric characters, underscores, or hyphens (-).")
+    
+    # 4. Contains no two consecutive periods (..)
+    if '..' in filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename must not contain two consecutive periods (..).")
+    
+    # 5. Is not a valid IPv4 address
+    try:
+        ipaddress.IPv4Address(filename)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename must not be a valid IPv4 address.")
+    except ipaddress.AddressValueError:
+        pass
+    
+    return True

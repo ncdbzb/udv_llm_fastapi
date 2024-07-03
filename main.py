@@ -1,6 +1,6 @@
 import uvicorn
+import asyncio
 from fastapi import FastAPI
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
 from src.auth.auth_config import auth_backend, fastapi_users
@@ -11,10 +11,11 @@ from src.docs.router import router as upload_docs_router
 from src.llm_service.router import router as llm_service_router
 from src.admin_panel.router import router as admin_panel_router
 from config.config import CORS_ORIGINS
+from check_doc_table import check_doc_table
 
 
 app = FastAPI(
-    title="UDV LLM",
+    title="DATAPK ITM",
     root_path="/api"
 )
 
@@ -71,11 +72,17 @@ app.include_router(
     tags=["Admin"]
 )
 
-if __name__ == "__main__":
-    uvicorn.run(
+async def main():
+    await check_doc_table()
+
+    config = uvicorn.Config(
         app,
         host="0.0.0.0",
-        port=8000,
-        # ssl_keyfile='/chatops_udv/fast_api/certs/key.pem',
-        # ssl_certfile='/chatops_udv/fast_api/certs/cert.pem'
+        port=8000
     )
+    server = uvicorn.Server(config)
+    await server.serve()
+    
+
+if __name__ == "__main__":
+    asyncio.run(main())

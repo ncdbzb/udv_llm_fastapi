@@ -8,7 +8,7 @@ from database.database import async_session_maker
 
 
 async def check_doc_table():
-    for i in range(5):
+    for _ in range(5):
         try:
             actual_doc_list = await request_get_actual_doc_list()
             if actual_doc_list:
@@ -49,7 +49,3 @@ async def check_doc_table():
             await session.execute(add_stmt)
             await session.commit()
             print(f'Documents {add_doc_list} were added to db')
-
-
-if __name__ == '__main__':
-    asyncio.run(check_doc_table())

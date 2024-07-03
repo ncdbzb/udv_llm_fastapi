@@ -2,7 +2,7 @@ import asyncio
 import os
 import shutil
 
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from sqlalchemy import insert, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +10,7 @@ from src.auth.auth_config import current_verified_user, current_superuser
 from src.auth.models import AuthUser
 from database.database import get_async_session
 from src.docs.models import doc
-from src.docs.utils import send_file_to_llm, request_delete_doc
+from src.docs.utils import send_file_to_llm, request_delete_doc, is_valid_filename
 
 router = APIRouter()
 
@@ -22,21 +22,26 @@ router = APIRouter()
 async def upload_form(
         dock_name: str,
         dock_description: str,
-        # background_tasks: BackgroundTasks,
         file: UploadFile = File(...),
         user: AuthUser = Depends(current_verified_user),
         session: AsyncSession = Depends(get_async_session)):
-    if file.filename.split('.')[-1] not in ('zip', 'txt'):
+    is_valid_filename(dock_name)
+    extension = file.filename.split('.')[-1]
+
+    if extension not in ('zip', 'txt'):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File has an unsupported extension")
-    query = select(doc).where(doc.c.name == dock_name)
-    result = await session.execute(query)
-    if result.fetchone():
+    
+    doc_exist = select(doc).where(doc.c.name == dock_name)
+    if await session.execute(doc_exist).fetchone():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Document with this name already exists")
+    
     try:
-        new_name = f"{dock_name}.{file.filename.split('.')[-1]}"
+        new_name = f"{dock_name}.{extension}"
         file_path = f"src/docs/temp/{new_name}"
+
         with open(file_path, "wb") as file_object:
             shutil.copyfileobj(file.file, file_object)
+        
         print(f'file {new_name} saved at {file_path}')
 
         await send_file_to_llm(file_path)
@@ -61,7 +66,10 @@ async def upload_form(
     '/my',
     status_code=status.HTTP_200_OK,
 )
-async def get_my_docs(user: AuthUser = Depends(current_verified_user), session: AsyncSession = Depends(get_async_session)):
+async def get_my_docs(
+    user: AuthUser = Depends(current_verified_user),
+    session: AsyncSession = Depends(get_async_session)
+):
     query = select(doc).where(doc.c.user_id == int(user.id))
     result = await session.execute(query)
 
@@ -74,11 +82,11 @@ async def get_my_docs(user: AuthUser = Depends(current_verified_user), session: 
 )
 async def get_my_docs(
     session: AsyncSession = Depends(get_async_session),
-    user: AuthUser = Depends(current_superuser)):
-    query = select(doc)
-    result = await session.execute(query)
+    user: AuthUser = Depends(current_superuser)
+):
+    my_docs = await session.execute(select(doc))
 
-    return result.mappings().all()
+    return my_docs.mappings().all()
 
 
 @router.delete(
