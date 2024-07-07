@@ -4,7 +4,7 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-from src.llm_service.models import request_statistic, feedback
+from src.llm_service.models import request_statistic, feedback, test_system, answer_question_system
 
 
 async def add_statistic_row(
@@ -12,10 +12,11 @@ async def add_statistic_row(
         prompt_path: str,
         tokens: int,
         total_time: float,
-        metrics: list[int] | None,
+        metrics: list | None,
         gigachat_time: float,
+        response: dict,
         session: AsyncSession
-):
+) -> int:
     try:
         stmt = insert(request_statistic).values(
             timestamp=datetime.now(),
@@ -23,7 +24,6 @@ async def add_statistic_row(
             prompt_path=prompt_path,
             tokens=tokens,
             total_time=total_time,
-            metrics=metrics,
             gigachat_time=gigachat_time
         )
         await session.execute(stmt)
@@ -31,6 +31,27 @@ async def add_statistic_row(
 
         last_row = await session.execute(select(request_statistic).order_by(request_statistic.c.id.desc()).limit(1))
         last_id = last_row.scalar()
+
+        if metrics:
+            stmt = insert(answer_question_system).values(
+                request_id=last_id,
+                question=response['question'],
+                answer=response['answer'],
+                metrics=metrics
+            )
+        else:
+            stmt = insert(test_system).values(
+                request_id=last_id,
+                question=response['question'],
+                option_1=response['1 option'],
+                option_2=response['2 option'],
+                option_3=response['3 option'],
+                option_4=response['4 option'],
+                right_answer=response['right answer'],
+            )
+        await session.execute(stmt)
+        await session.commit()
+
         return last_id
     except IntegrityError as e:
         print(e)
@@ -38,7 +59,6 @@ async def add_statistic_row(
 
 async def add_feedback_row(
         value: str,
-        llm_response: str,
         user_comment: str,
         request_id: int,
         session: AsyncSession
@@ -46,7 +66,6 @@ async def add_feedback_row(
     try:
         stmt = insert(feedback).values(
             value=value,
-            llm_response=llm_response,
             user_comment=user_comment,
             request_id=request_id,
         )

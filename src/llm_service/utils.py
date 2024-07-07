@@ -1,4 +1,11 @@
 import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, desc
+
+from src.auth.models import user
+from src.llm_service.schemas import ContestResponse
+from src.llm_service.models import contest
+
 
 
 async def send_data_to_llm(endpoint: str, data: dict):
