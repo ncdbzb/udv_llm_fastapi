@@ -10,6 +10,7 @@ from src.auth.routers.forgot_pass_router import router as forgot_pass_router
 from src.docs.router import router as upload_docs_router
 from src.llm_service.router import router as llm_service_router
 from src.admin_panel.router import router as admin_panel_router
+from src.llm_service.contest import router as contest_router
 from config.config import CORS_ORIGINS
 from check_doc_table import check_doc_table
 
@@ -70,6 +71,11 @@ app.include_router(
     admin_panel_router,
     prefix="/admin",
     tags=["Admin"]
+)
+app.include_router(
+    contest_router,
+    prefix="/contest",
+    tags=["Contest"]
 )
 
 async def main():

@@ -5,11 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
 from src.llm_service.models import request_statistic, feedback, test_system, answer_question_system
+from src.llm_service.utils import convert_time
 
 
 async def add_statistic_row(
+        user_id: int,
         operation: str,
         prompt_path: str,
+        filename: str,
         tokens: int,
         total_time: float,
         metrics: list | None,
@@ -19,9 +22,11 @@ async def add_statistic_row(
 ) -> int:
     try:
         stmt = insert(request_statistic).values(
-            timestamp=datetime.now(),
+            user_id=user_id,
+            received_at=convert_time(datetime.now()),
             operation=operation,
             prompt_path=prompt_path,
+            doc_name=filename,
             tokens=tokens,
             total_time=total_time,
             gigachat_time=gigachat_time
