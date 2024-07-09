@@ -1,11 +1,9 @@
 import string
-from datetime import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy import insert, select, update, and_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.llm_service.models import contest, request_statistic, test_system, answer_question_system
-from src.llm_service.utils import convert_time
 from database.database import get_async_session
 from src.auth.models import AuthUser, user
 from src.llm_service.schemas import ContestResponse
@@ -208,7 +206,7 @@ async def get_my_leaderboard(
         return []
     
 
-@router.get("/leaderboard/me")
+@router.get("/leaderboard_me")
 async def get_my_leaderboards(
     session: AsyncSession = Depends(get_async_session),
     current_user: AuthUser = Depends(current_verified_user)

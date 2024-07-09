@@ -14,7 +14,7 @@ class ContestResponse(BaseModel):
     place: int
     name: str
     surname: str
-    points: int
+    points: int | float
     total_tests: int
 
     class Config:
