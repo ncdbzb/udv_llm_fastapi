@@ -32,7 +32,7 @@ async def upload_form(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File has an unsupported extension")
     
     doc_exist = select(doc).where(doc.c.name == dock_name)
-    if await session.execute(doc_exist).fetchone():
+    if (await session.execute(doc_exist)).fetchone():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Document with this name already exists")
     
     try:
