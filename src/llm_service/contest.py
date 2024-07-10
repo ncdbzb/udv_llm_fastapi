@@ -214,5 +214,5 @@ async def get_my_leaderboards(
     datapk_itm_leaderboard = await get_my_leaderboard(session, current_user, CONTEST_DATAPK_ITM)
     datapk_leaderboard = await get_my_leaderboard(session, current_user, CONTEST_DATAPK)
 
-    return {'datapk_itm': datapk_itm_leaderboard,
-            'datapk': datapk_leaderboard}
+    return {'datapk_itm': {'doc_name': CONTEST_DATAPK_ITM, 'leaderboard': datapk_itm_leaderboard},
+            'datapk': {'doc_name': CONTEST_DATAPK, 'leaderboard': datapk_leaderboard}}
