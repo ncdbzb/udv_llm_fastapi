@@ -11,7 +11,7 @@ from src.auth.auth_config import current_verified_user
 
 
 CONTEST_DATAPK_ITM = 'new_datapk800'
-CONTEST_DATAPK = 'new_datapk1000'
+CONTEST_DATAPK = 'DATAPK_VERSION_2_1'
 
 router = APIRouter()
 
@@ -150,12 +150,12 @@ async def get_full_leaderboard(session: AsyncSession, filename: str) -> list[Con
     return leaderboard
 
 
-@router.get("/leaderboard/datapk-itm", response_model=list[ContestResponse])
+@router.get(f"/leaderboard/{CONTEST_DATAPK_ITM}", response_model=list[ContestResponse])
 async def get_datapk_itm_leaderboard(session: AsyncSession = Depends(get_async_session)) -> list[ContestResponse]:
     return await get_full_leaderboard(session, CONTEST_DATAPK_ITM)
 
 
-@router.get("/leaderboard/datapk", response_model=list[ContestResponse])
+@router.get(f"/leaderboard/{CONTEST_DATAPK}", response_model=list[ContestResponse])
 async def get_datapk_itm_leaderboard(session: AsyncSession = Depends(get_async_session)) -> list[ContestResponse]:
     return await get_full_leaderboard(session, CONTEST_DATAPK)
 
