@@ -10,7 +10,7 @@ from src.llm_service.schemas import ContestResponse
 from src.auth.auth_config import current_verified_user
 
 
-CONTEST_DATAPK_ITM = 'new_datapk800'
+CONTEST_DATAPK_ITM = 'DATAPK_ITM_VERSION_1_7'
 CONTEST_DATAPK = 'DATAPK_VERSION_2_1'
 
 router = APIRouter()

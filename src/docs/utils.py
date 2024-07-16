@@ -10,7 +10,6 @@ async def send_file_to_llm(file_path: str):
         with open(file_path, "rb") as file:
             files = {"file": (file.name.split('/')[-1], file, "application/octet-stream")}
             response = await client.post(url, files=files, timeout=150)
-            print(response.text)
             return response.json()
 
 
@@ -26,6 +25,22 @@ async def request_get_actual_doc_list():
         url = "http://gigachat_api:8080/process_get_actual_doc_list"
         response = await client.post(url, timeout=10)
         return response.json()
+    
+
+async def request_change_doc_name(cur_name: str, new_name: str):
+    async with httpx.AsyncClient() as client:
+        url = "http://gigachat_api:8080/process_change_doc_name"
+        response = await client.post(url, json={'cur_name': cur_name, 'new_name': new_name}, timeout=10)
+        return response.json()
+    
+
+async def request_add_data(file_path: str):
+    async with httpx.AsyncClient() as client:
+        url = "http://gigachat_api:8080/process_add_data"
+        with open(file_path, "rb") as file:
+            files = {"file": (file.name.split('/')[-1], file, "application/octet-stream")}
+            response = await client.post(url, files=files, timeout=60)
+            return response.json()
 
 
 def is_valid_filename(filename: str) -> bool:

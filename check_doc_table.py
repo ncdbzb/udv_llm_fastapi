@@ -3,8 +3,10 @@ import httpx
 
 from src.docs.utils import request_get_actual_doc_list
 from src.docs.models import doc
+from src.auth.models import user
 from sqlalchemy import select, delete, insert
 from database.database import async_session_maker
+from config.config import admin_dict
 
 
 async def check_doc_table():
@@ -18,8 +20,7 @@ async def check_doc_table():
     else:
         raise asyncio.TimeoutError('Something went wrong')
     async with async_session_maker() as session:
-        query = select(doc.c.name)
-        result = await session.execute(query)
+        result = await session.execute(select(doc.c.name))
 
         db_doc_list = [row for row in result.scalars().all()]    
 
@@ -39,10 +40,13 @@ async def check_doc_table():
             await session.commit()
             print(f'Documents {del_doc_list} were deleted from db')
 
+        result = (await session.execute(select(user.c.id).where(user.c.email == admin_dict['email']))).fetchone()
+        admin_id = result[0] if result else None
+
         if add_doc_list:
             add_stmt = insert(doc).values(
                 [
-                    {'name': name, 'description': 'data', 'user_id': None}
+                    {'name': name, 'description': 'data', 'user_id': admin_id}
                     for name in add_doc_list
                 ]
             )
