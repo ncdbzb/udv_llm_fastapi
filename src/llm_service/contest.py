@@ -117,7 +117,7 @@ async def fill_contest(
                 ))
             .values(
                 total_tests=contest.c.total_tests + 1,
-                cheat_tests=contest.c.cheat_tests + 0 if points_result == int(points_result) else 1,
+                cheat_tests=contest.c.cheat_tests + (0 if points_result == int(points_result) else 1),
                 points=contest.c.points + points_result
             )
         )
