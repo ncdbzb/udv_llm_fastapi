@@ -58,5 +58,8 @@ contest = Table(
     Column("user_id", Integer, ForeignKey(user.c.id)),
     Column("doc_name", String, nullable=False),
     Column("total_tests", Integer, nullable=False),
+    Column("cheat_tests", Integer, nullable=True),
+    Column("answer_question_feedbacks", Integer, nullable=True, default=0),
+    Column("test_feedbacks", Integer, nullable=True, default=0),
     Column("points", Numeric(precision=4, scale=1), nullable=False)
 )

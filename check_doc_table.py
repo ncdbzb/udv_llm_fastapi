@@ -7,6 +7,7 @@ from src.auth.models import user
 from sqlalchemy import select, delete, insert
 from database.database import async_session_maker
 from config.config import admin_dict
+from config.logs import doc_info
 
 
 async def check_doc_table():
@@ -31,17 +32,19 @@ async def check_doc_table():
         del_doc_list = list(db_set - actual_set)
 
         if not (add_doc_list or del_doc_list):
-            print('Doc table initialized succefully')
+            doc_info.debug('Doc table initialized succefully')
             return
  
         if del_doc_list:
             delete_stmt = delete(doc).where(doc.c.name.in_(del_doc_list))
             await session.execute(delete_stmt)
             await session.commit()
-            print(f'Documents {del_doc_list} were deleted from db')
+            doc_info.info(f'Documents {del_doc_list} were deleted from db')
 
         result = (await session.execute(select(user.c.id).where(user.c.email == admin_dict['email']))).fetchone()
         admin_id = result[0] if result else None
+        if not admin_id:
+            doc_info.warning(f'Documents got {admin_id} in \"user_id\" field!')
 
         if add_doc_list:
             add_stmt = insert(doc).values(
@@ -52,4 +55,4 @@ async def check_doc_table():
             )
             await session.execute(add_stmt)
             await session.commit()
-            print(f'Documents {add_doc_list} were added to db')
+            doc_info.info(f'Documents {add_doc_list} were added to db')

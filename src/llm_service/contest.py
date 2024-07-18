@@ -92,13 +92,18 @@ async def fill_contest(
             )
         )
     )).fetchone()
+
+    points_result = await count_points(session, current_user, filename, selected_option, right_answer, request_id)
         
     if not existing_entry:
         stmt = insert(contest).values(
             user_id=current_user.id,
             doc_name=filename,
             total_tests=1,
-            points=await count_points(session, current_user, filename, selected_option, right_answer, request_id)
+            cheat_tests=0 if points_result == int(points_result) else 1,
+            test_feedbacks=0,
+            answer_question_feedbacks=0,
+            points=points_result
         )
         await session.execute(stmt)
         await session.commit()
@@ -112,7 +117,8 @@ async def fill_contest(
                 ))
             .values(
                 total_tests=contest.c.total_tests + 1,
-                points=contest.c.points + await count_points(session, current_user, filename, selected_option, right_answer, request_id)
+                cheat_tests=contest.c.cheat_tests + 0 if points_result == int(points_result) else 1,
+                points=contest.c.points + points_result
             )
         )
         await session.execute(update_stmt)

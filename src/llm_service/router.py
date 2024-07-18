@@ -4,14 +4,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, update
 
 from database.database import get_async_session
-from src.llm_service.contest import fill_contest
+from src.llm_service.contest import fill_contest, CONTEST_DATAPK, CONTEST_DATAPK_ITM
 from src.auth.models import AuthUser
 from src.llm_service.schemas import Feedback, CheckTest
 from src.llm_service.utils import send_data_to_llm, convert_time
 from src.docs.models import doc
+from src.llm_service.models import contest
 from src.llm_service.models import test_system, request_statistic
 from src.llm_service.statistics import add_statistic_row, add_feedback_row
 from src.auth.auth_config import current_verified_user
+
+from config.logs import doc_info
 
 router = APIRouter()
 
@@ -121,7 +124,7 @@ async def check_test(
 @router.post("/send_feedback")
 async def send_feedback(
     feedback: Feedback,
-    user: AuthUser = Depends(current_verified_user),
+    current_user: AuthUser = Depends(current_verified_user),
     session: AsyncSession = Depends(get_async_session)
 ):
     await add_feedback_row(
@@ -130,4 +133,34 @@ async def send_feedback(
         request_id=feedback.request_id,
         session=session
     )
+
+    existing_entry = (await session.execute(
+        select(request_statistic.c.operation, request_statistic.c.doc_name).where(
+            and_(
+                request_statistic.c.id == feedback.request_id,
+                request_statistic.c.doc_name.in_((CONTEST_DATAPK, CONTEST_DATAPK_ITM))
+            )
+        )
+    )).fetchone()
+
+    if existing_entry:
+        operation, filename = existing_entry[0], existing_entry[1]
+        update_data = {}
+        if operation == 'get_test':
+            update_data['test_feedbacks'] = contest.c.test_feedbacks + 1
+        elif operation == 'get_answer':
+            update_data['answer_question_feedbacks'] = contest.c.answer_question_feedbacks + 1
+
+        update_stmt = (
+            update(contest)
+            .where(
+                and_(
+                    contest.c.user_id == current_user.id,
+                    contest.c.doc_name == filename
+                ))
+            .values(**update_data)
+        )
+        await session.execute(update_stmt)
+        await session.commit()
+
     return {"result": "feedback added successfully"}

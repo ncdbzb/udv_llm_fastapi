@@ -3,7 +3,7 @@ import os
 import shutil
 
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
-from sqlalchemy import insert, select, delete, update
+from sqlalchemy import insert, select, delete, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.logs import doc_info
@@ -77,7 +77,7 @@ async def get_my_docs(
     user: AuthUser = Depends(current_verified_user),
     session: AsyncSession = Depends(get_async_session)
 ):
-    query = select(doc).where(doc.c.user_id == int(user.id))
+    query = select(doc.c.name, doc.c.description).where(or_(doc.c.user_id == int(user.id), doc.c.in_contest == True))
     result = await session.execute(query)
 
     return result.mappings().all()
@@ -168,7 +168,7 @@ async def get_all_docs(
     session: AsyncSession = Depends(get_async_session),
     user: AuthUser = Depends(current_superuser)
 ):
-    my_docs = await session.execute(select(doc))
+    my_docs = await session.execute(select(doc.c.name, doc.c.description))
 
     return my_docs.mappings().all()
 
@@ -206,7 +206,7 @@ async def del_my_docs(
         result = await (session.execute(query))
         check_owner = result.mappings().one()['user_id']
         if check_owner != user.id:
-            raise HTTPException(status_code=403, detail=f"You are not the owner of this document")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Forbidden")
 
     try:
         stmt = delete(doc).where(doc.c.name == doc_name)
