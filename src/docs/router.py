@@ -25,7 +25,7 @@ async def upload_form(
     dock_name: str,
     dock_description: str,
     file: UploadFile = File(...),
-    user: AuthUser = Depends(current_verified_user),
+    user: AuthUser = Depends(current_superuser),
     session: AsyncSession = Depends(get_async_session)
 ):
     is_valid_filename(dock_name)
