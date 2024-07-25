@@ -27,4 +27,4 @@ def convert_time(cur_time: str | datetime) -> datetime:
 
     time_local = time_utc.replace(tzinfo=pytz.UTC).astimezone(local_timezone)
 
-    return time_local.replace(tzinfo=None).replace(microsecond=0)
+    return time_local.replace(tzinfo=None)

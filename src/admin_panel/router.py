@@ -36,7 +36,7 @@ async def reject_request(
     result = await session.execute(query)
     info = result.fetchone().info
 
-    await send_email(name=info.get('name'), user_email=info.get('email'), token='', destiny='reject')
+    await send_email(name=info.get('name'), user_email=info.get('email'), destiny='reject')
 
     stmt = update(admin_requests).where(admin_requests.c.id == int(request_id)).values(status='rejected')
     await session.execute(stmt)

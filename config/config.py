@@ -33,5 +33,6 @@ admin_dict: dict[str: Any] = {
     'is_superuser': True,
     'is_verified': True
 }
+SEND_ADMIN_NOTICES = os.getenv('SEND_ADMIN_NOTICES', 'False').lower() in ('true', '1', 't', 'y', 'yes')
 
 SERVER_DOMEN = os.environ.get("SERVER_DOMEN")

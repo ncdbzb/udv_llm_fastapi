@@ -14,8 +14,6 @@ from src.llm_service.models import test_system, request_statistic
 from src.llm_service.statistics import add_statistic_row, add_feedback_row
 from src.auth.auth_config import current_verified_user
 
-from config.logs import doc_info
-
 router = APIRouter()
 
 
@@ -23,7 +21,7 @@ router = APIRouter()
 async def send_data(
     filename: str,
     question: str,
-    user: AuthUser = Depends(current_verified_user),
+    current_user: AuthUser = Depends(current_verified_user),
     session: AsyncSession = Depends(get_async_session)
 ):
     data = {'filename': filename,
@@ -35,11 +33,12 @@ async def send_data(
     
     response = await send_data_to_llm('process_questions', data)
     request_id = await add_statistic_row(
-        user_id=user.id,
+        current_user=current_user,
         operation='get_answer',
         prompt_path=response['prompt_path'],
         filename=filename,
         tokens=response['tokens'],
+        embedding_tokens=response['embedding_tokens'],
         total_time=response['total_time'],
         metrics=response['metrics'],
         gigachat_time=response['gigachat_time'],
@@ -56,17 +55,18 @@ async def send_data(
 @router.post("/get_test")
 async def send_data(
     filename: str,
-    user: AuthUser = Depends(current_verified_user),
+    current_user: AuthUser = Depends(current_verified_user),
     session: AsyncSession = Depends(get_async_session)
 ):
     data = {'filename': filename}
     response = await send_data_to_llm('process_data', data)
     request_id = await add_statistic_row(
-        user_id=user.id,
+        current_user=current_user,
         operation='get_test',
         prompt_path=response['prompt_path'],
         filename=filename,
         tokens=response['tokens'],
+        embedding_tokens=0,
         total_time=response['total_time'],
         metrics=None,
         gigachat_time=response['gigachat_time'],

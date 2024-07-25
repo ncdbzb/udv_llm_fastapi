@@ -13,6 +13,7 @@ request_statistic = Table(
     Column("prompt_path", String, nullable=False),
     Column("doc_name", String, nullable=True),
     Column("tokens", Integer, nullable=False),
+    Column("embedding_tokens", Integer, nullable=True, default=0),
     Column("total_time", Numeric(precision=10, scale=3), nullable=False),
     Column("gigachat_time", Numeric(precision=10, scale=3)),
 )
