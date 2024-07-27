@@ -1,19 +1,14 @@
 import smtplib
 from email.message import EmailMessage
-
-from config.config import SMTP_PASSWORD, SMTP_USER, SERVER_DOMEN, admin_dict
-
-
-SMTP_HOST = 'smtp.gmail.com'
-SMTP_PORT = 465
+from config.config import SMTP_USER, SERVER_DOMEN, admin_dict
 
 
-async def get_approval_email_template(name: str, user_email: str) -> EmailMessage:
+def get_approval_email_template(name: str, user_email: str) -> EmailMessage:
     email = EmailMessage()
     email['Subject'] = 'Заявка'
     email['From'] = SMTP_USER
     email['To'] = user_email
-
+ 
     email.set_content(
         '<div>'
         f'<h1>Здравствуйте, {name}</h1>'
@@ -24,7 +19,7 @@ async def get_approval_email_template(name: str, user_email: str) -> EmailMessag
     return email
 
 
-async def get_accepted_request_email_template(name: str, user_email: str, token: str) -> EmailMessage:
+def get_accepted_request_email_template(name: str, user_email: str, token: str) -> EmailMessage:
     email = EmailMessage()
     email['Subject'] = 'Заявка'
     email['From'] = SMTP_USER
@@ -41,7 +36,7 @@ async def get_accepted_request_email_template(name: str, user_email: str, token:
     return email
 
 
-async def get_rejected_request_email_template(name: str, user_email: str,) -> EmailMessage:
+def get_rejected_request_email_template(name: str, user_email: str,) -> EmailMessage:
     email = EmailMessage()
     email['Subject'] = 'Заявка'
     email['From'] = SMTP_USER
@@ -57,7 +52,7 @@ async def get_rejected_request_email_template(name: str, user_email: str,) -> Em
     return email
 
 
-async def get_forgot_email_template(name: str, user_email: str, token: str) -> EmailMessage:
+def get_forgot_email_template(name: str, user_email: str, token: str) -> EmailMessage:
     email = EmailMessage()
     email['Subject'] = 'Сброс пароля'
     email['From'] = SMTP_USER
@@ -74,7 +69,7 @@ async def get_forgot_email_template(name: str, user_email: str, token: str) -> E
     return email
 
 
-async def get_admin_approval_email_template(name: str, surname: str, user_email: str) -> EmailMessage:
+def get_admin_approval_email_template(name: str, surname: str, user_email: str) -> EmailMessage:
     email = EmailMessage()
     email['Subject'] = 'Новая заявка на регистрацию'
     email['From'] = SMTP_USER
@@ -104,7 +99,7 @@ async def get_admin_approval_email_template(name: str, surname: str, user_email:
     return email
 
 
-async def get_time_limit_qa_template(
+def get_time_limit_qa_template(
     filename: str, 
     tokens: int, 
     total_time: float, 
@@ -157,7 +152,7 @@ async def get_time_limit_qa_template(
     return email
 
 
-async def get_time_limit_test_template(
+def get_time_limit_test_template(
     filename: str, 
     tokens: int, 
     total_time: float, 
@@ -220,7 +215,7 @@ async def get_time_limit_test_template(
     return email
 
 
-async def get_token_limit_template(name: str, surname: str, user_email: str, tokens_by_doc: dict[str: int]) -> EmailMessage:
+def get_token_limit_template(name: str, surname: str, user_email: str, tokens_by_doc: dict[str: int]) -> EmailMessage:
     email = EmailMessage()
     email['Subject'] = 'Превышен лимит затрат токенов одним пользователем!'
     email['From'] = SMTP_USER
@@ -252,29 +247,3 @@ async def get_token_limit_template(name: str, surname: str, user_email: str, tok
 )
     return email
 
-async def send_email(**kwargs):
-    destiny = kwargs.pop('destiny')
-    if destiny == 'approval':
-        email = await get_approval_email_template(**kwargs)
-    elif destiny == 'accept':
-        email = await get_accepted_request_email_template(**kwargs)
-    elif destiny == 'forgot':
-        email = await get_forgot_email_template(**kwargs)
-    elif destiny == 'reject':
-        email = await get_rejected_request_email_template(**kwargs)
-    elif destiny == 'admin_approval':
-        email = await get_admin_approval_email_template(**kwargs)
-    elif destiny == 'qa_time_limit':
-        email = await get_time_limit_qa_template(**kwargs)
-    elif destiny == 'test_time_limit':
-        email = await get_time_limit_test_template(**kwargs)
-    elif destiny == 'token_limit':
-        email = await get_token_limit_template(**kwargs)
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.send_message(email)
-    return {
-         "status_code": 200,
-         "data": "Письмо отправлено",
-         "details": None
-    }

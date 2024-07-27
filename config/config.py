@@ -16,6 +16,8 @@ SECRET_JWT = os.environ.get("SECRET_JWT")
 
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 SMTP_USER = os.environ.get("SMTP_USER")
+SMTP_HOST = 'smtp.gmail.com'
+SMTP_PORT = 465
 
 CORS_ORIGINS = os.environ.get("CORS_ORIGINS")
 
@@ -36,3 +38,6 @@ admin_dict: dict[str: Any] = {
 SEND_ADMIN_NOTICES = os.getenv('SEND_ADMIN_NOTICES', 'False').lower() in ('true', '1', 't', 'y', 'yes')
 
 SERVER_DOMEN = os.environ.get("SERVER_DOMEN")
+
+REDIS_PORT = int(os.environ.get("REDIS_PORT"))
+

@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from src.auth.models import AuthUser
 from src.llm_service.models import request_statistic, feedback, test_system, answer_question_system
 from src.llm_service.utils import convert_time
-from src.auth.send_email import send_email
+from src.services.celery_service import send_email
 from config.config import SEND_ADMIN_NOTICES
 
 
@@ -91,7 +91,7 @@ async def add_statistic_row(
                 result = (await session.execute(query)).fetchall()
                 tokens_by_doc_name = {row[0]: row[1] for row in result}
 
-                await send_email(
+                send_email.delay(
                     name=current_user.name,
                     surname=current_user.surname,
                     user_email=current_user.email,
@@ -101,7 +101,7 @@ async def add_statistic_row(
 
             if total_time > 15:
                 if operation == 'get_answer':
-                    await send_email(
+                    send_email.delay(
                         filename=filename,
                         tokens=tokens, 
                         total_time=total_time, 
@@ -111,7 +111,7 @@ async def add_statistic_row(
                         destiny='qa_time_limit'
                     )
                 elif operation == 'get_test':
-                    await send_email(
+                    send_email.delay(
                         filename=filename,
                         tokens=tokens, 
                         total_time=total_time, 

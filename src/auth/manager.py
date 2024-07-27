@@ -7,7 +7,7 @@ from fastapi_users.jwt import generate_jwt, decode_jwt
 
 from src.auth.models import AuthUser
 from src.auth.utils import get_user_db
-from src.auth.send_email import send_email
+from src.services.celery_service import send_email
 from database.database import async_session_maker
 from src.admin_panel.utils import add_admin_request
 from config.config import SECRET_MANAGER, admin_dict, SEND_ADMIN_NOTICES
@@ -17,6 +17,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
     reset_password_token_secret = SECRET_MANAGER
     verification_token_secret = SECRET_MANAGER
 
+
     async def on_after_register(self, user: AuthUser, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
 
@@ -24,9 +25,9 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
             async with async_session_maker() as session:
                 await add_admin_request(user.email, session=session)
 
-            await send_email(name=user.name, user_email=user.email, destiny='approval')
+            send_email.delay(name=user.name, user_email=user.email, destiny='approval')
             if SEND_ADMIN_NOTICES:
-                await send_email(name=user.name, surname=user.surname, user_email=user.email, destiny='admin_approval')
+                send_email.delay(name=user.name, surname=user.surname, user_email=user.email, destiny='admin_approval')
 
     async def on_after_forgot_password(
             self, user: AuthUser, token: str, request: Optional[Request] = None
@@ -42,7 +43,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[AuthUser, int]):
             self.reset_password_token_secret,
             self.reset_password_token_lifetime_seconds,
         )
-        await send_email(name=user.name, user_email=user.email, token=token, destiny='forgot')
+        send_email.delay(name=user.name, user_email=user.email, token=token, destiny='forgot')
 
     async def validate_password(
             self, password: str, user: AuthUser, user_update: Dict[str, Any] = None
