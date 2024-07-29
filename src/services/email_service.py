@@ -28,7 +28,7 @@ def get_accepted_request_email_template(name: str, user_email: str, token: str) 
     email.set_content(
         '<div>'
         f'<h1>Здравствуйте, {name}</h1>'
-        '<p>Ваша заявка одобрена! Чтобы верифицировать аккаунт, перейдите по <b>ссылке</b></p>'
+        '<p>Ваша заявка одобрена! Чтобы верифицировать аккаунт, перейдите по <b>ссылке</b><br>Ссылка будет доступна в течении 1 суток.</p>'
         f'<p>https://{SERVER_DOMEN}/logIn?token={token}</p>'
         '</div>',
         subtype='html'

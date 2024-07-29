@@ -32,7 +32,7 @@ async def reject_request(
         user: AuthUser = Depends(current_superuser),
         session: AsyncSession = Depends(get_async_session)
 ):
-    query = select(admin_requests).where(admin_requests.c.id == int(request_id))
+    query = select(admin_requests).where(and_(admin_requests.c.id == int(request_id), admin_requests.c.status == 'approval'))
     result = (await session.execute(query)).fetchone()
 
     if not result:
