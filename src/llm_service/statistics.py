@@ -58,6 +58,7 @@ async def add_statistic_row(
                 option_3=response['3 option'],
                 option_4=response['4 option'],
                 right_answer=response['right answer'],
+                generation_attempts=response['generation_attemps']
             )
         await session.execute(stmt)
         await session.commit()

@@ -38,6 +38,7 @@ test_system = Table(
     Column("option_3", String, nullable=False),
     Column("option_4", String, nullable=False),
     Column("right_answer", String, nullable=False),
+    Column("generation_attempts", Integer, nullable=True),
     Column("answered_at", DateTime, nullable=True, default=None),
 )
 
