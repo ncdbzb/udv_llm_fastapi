@@ -16,8 +16,9 @@ async def check_doc_table():
             actual_doc_list = await request_get_actual_doc_list()
             if actual_doc_list:
                 break
-        except httpx.ConnectError:
-            await asyncio.sleep(1)
+        except httpx.ConnectError as e:
+            doc_info.error(e)
+            await asyncio.sleep(5)
     else:
         raise asyncio.TimeoutError('Something went wrong')
     async with async_session_maker() as session:
