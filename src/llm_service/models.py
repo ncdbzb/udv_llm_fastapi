@@ -10,12 +10,13 @@ request_statistic = Table(
     Column("user_id", Integer, ForeignKey(user.c.id)),
     Column("received_at", DateTime),
     Column("operation", String, nullable=False),
-    Column("prompt_path", String, nullable=False),
+    Column("prompt_path", String, nullable=True),
     Column("doc_name", String, nullable=True),
     Column("tokens", Integer, nullable=False),
     Column("embedding_tokens", Integer, nullable=True, default=0),
     Column("total_time", Numeric(precision=10, scale=3), nullable=False),
     Column("gigachat_time", Numeric(precision=10, scale=3)),
+    Column("from_cache", Boolean, nullable=True)
 )
 
 feedback = Table(
@@ -50,7 +51,7 @@ answer_question_system = Table(
     Column("request_id", Integer, ForeignKey(request_statistic.c.id)),
     Column("question", String, nullable=False),
     Column("answer", String, nullable=False),
-    Column("metrics", JSON, nullable=False),
+    Column("metrics", JSON, nullable=True),
 )
 
 contest = Table(

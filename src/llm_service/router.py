@@ -42,6 +42,7 @@ async def send_data(
         total_time=response['total_time'],
         metrics=response['metrics'],
         gigachat_time=response['gigachat_time'],
+        from_cache=response['from_cache'],
         response=response['result'],
         session=session
     )
@@ -70,6 +71,7 @@ async def send_data(
         total_time=response['total_time'],
         metrics=None,
         gigachat_time=response['gigachat_time'],
+        from_cache=False,
         response=response['result']['result'],
         session=session
     )

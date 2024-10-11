@@ -9,8 +9,8 @@ from src.services.email_service import (get_approval_email_template, get_accepte
 
 celery_app = Celery(
     'tasks',
-    broker=f'redis://redis:{REDIS_PORT}/0', 
-    result_backend=f'redis://redis:{REDIS_PORT}/0'
+    broker=f'redis://redis:{REDIS_PORT}/1',
+    result_backend=f'redis://redis:{REDIS_PORT}/1'
 )
 
 celery_app.conf.update(

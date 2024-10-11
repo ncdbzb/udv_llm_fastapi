@@ -21,6 +21,7 @@ async def add_statistic_row(
         total_time: float,
         metrics: list | None,
         gigachat_time: float,
+        from_cache: bool,
         response: dict,
         session: AsyncSession
 ) -> int:
@@ -34,7 +35,8 @@ async def add_statistic_row(
             tokens=tokens,
             embedding_tokens=embedding_tokens,
             total_time=total_time,
-            gigachat_time=gigachat_time
+            gigachat_time=gigachat_time,
+            from_cache=from_cache
         )
         await session.execute(stmt)
         await session.commit()
